@@ -20,11 +20,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+type Reporter struct {
+	Kind    string `json:"kind,omitempty"`
+	Key     string `json:"key,omitempty"`
+	Channel string `json:"channel,omitempty"`
+}
 
-// PodTrackerSpec defines the desired state of PodTracker.
 type PodTrackerSpec struct {
+	Name   string   `json:"name,omitempty"`
+	Report Reporter `json:"report,omitempty"`
 }
 
 // PodTrackerStatus defines the observed state of PodTracker.

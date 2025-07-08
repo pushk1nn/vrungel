@@ -37,12 +37,18 @@ spec:
           metadata:
             type: object
           spec:
-            description: PodTrackerSpec defines the desired state of PodTracker.
             properties:
-              foo:
-                description: Foo is an example field of PodTracker. Edit podtracker_types.go
-                  to remove/update
+              name:
                 type: string
+              report:
+                properties:
+                  channel:
+                    type: string
+                  key:
+                    type: string
+                  kind:
+                    type: string
+                type: object
             type: object
           status:
             description: PodTrackerStatus defines the observed state of PodTracker.

@@ -25,3 +25,5 @@ go.work
 *.swp
 *.swo
 *~
+
+# Discord Bot secrets file

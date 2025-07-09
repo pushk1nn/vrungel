@@ -27,3 +27,4 @@ go.work
 *~
 
 # Discord Bot secrets file
+config/discord/config.yml

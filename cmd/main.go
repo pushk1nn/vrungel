@@ -39,7 +39,9 @@ import (
 
 	crdv1 "vrungel.maxvk.com/controller/api/v1"
 	"vrungel.maxvk.com/controller/internal/controller"
+
 	// +kubebuilder:scaffold:imports
+	"vrungel.maxvk.com/controller/internal"
 )
 
 var (
@@ -210,6 +212,12 @@ func main() {
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder
+
+	// Add discord bot to manager
+	if err := mgr.Add((&internal.DiscordBot{})); err != nil {
+		setupLog.Error(err, "unable to start Discord bot")
+		os.Exit(1)
+	}
 
 	if metricsCertWatcher != nil {
 		setupLog.Info("Adding metrics certificate watcher to manager")

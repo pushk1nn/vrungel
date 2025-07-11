@@ -2,9 +2,9 @@ package internal
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/bwmarrin/discordgo"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"vrungel.maxvk.com/controller/config/discord"
 )
 
@@ -18,34 +18,35 @@ type DiscordBot struct {
 
 func (bot *DiscordBot) Start(ctx context.Context) error {
 
+	logger := log.FromContext(ctx)
 	session, err := discordgo.New("Bot " + discord.Token)
 	if err != nil {
 		panic(err)
 	}
 
 	bot.Session = session
-
 	bot.Session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages
-
 	bot.Session.State.MaxMessageCount = 50
 
 	err = bot.Session.Open()
-
+	logger.Info("Started Bot")
 	if err != nil {
-		panic(err)
+		logger.Error(err, "Could not start Bot")
 	}
 
-	// Sends message to #general
+	// Startup action
 	_, err = bot.Session.ChannelMessageSend("1392648744532443220", "Vrungel is starting...")
 	if err != nil {
-		fmt.Println("error sending message,", err)
+		logger.Error(err, "Could not send startup message")
 	}
 
 	<-ctx.Done()
+	logger.Info("Stopping Bot")
 
+	// Shutdown action
 	_, err = bot.Session.ChannelMessageSend("1392648744532443220", "Vrungel is stopping... Goodbye")
 	if err != nil {
-		fmt.Println("error sending message,", err)
+		logger.Error(err, "Could not send shutdown message")
 	}
 
 	return bot.Session.Close()

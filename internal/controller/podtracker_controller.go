@@ -19,12 +19,16 @@ package controller
 import (
 	"context"
 
+	corev1 "k8s.io/api/core/v1"
+
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-
-	crdv1 "vrungel.maxvk.com/controller/api/v1"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
 // PodTrackerReconciler reconciles a PodTracker object
@@ -54,10 +58,24 @@ func (r *PodTrackerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	return ctrl.Result{}, nil
 }
 
+func (r *PodTrackerReconciler) HandleServiceAccountEvents(ctx context.Context, sa client.Object) []reconcile.Request {
+
+	logger := log.FromContext(ctx)
+
+	if sa.GetNamespace() == "default" {
+		logger.Info("Event handler triggered!!!")
+	}
+	return []reconcile.Request{}
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *PodTrackerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&crdv1.PodTracker{}).
-		Named("podtracker").
+		Named("Vrungel").
+		Watches(
+			&corev1.ServiceAccount{},
+			handler.EnqueueRequestsFromMapFunc(r.HandleServiceAccountEvents),
+			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
+		).
 		Complete(r)
 }

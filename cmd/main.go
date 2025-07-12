@@ -206,17 +206,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	session, err := discordgo.New("Bot " + discord.Token)
-
-	if err := (&controller.PodTrackerReconciler{
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
-		Discord: session,
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "PodTracker")
-		os.Exit(1)
-	}
-	// +kubebuilder:scaffold:builder
+	session, _ := discordgo.New("Bot " + discord.Token)
 
 	// Add discord bot to manager
 	if err := mgr.Add((&bot.DiscordBot{
@@ -225,6 +215,16 @@ func main() {
 		setupLog.Error(err, "unable to start Discord bot")
 		os.Exit(1)
 	}
+
+	if err := (&controller.PodTrackerReconciler{
+		Client:  mgr.GetClient(),
+		Scheme:  mgr.GetScheme(),
+		Discord: bot.DiscordBot{Discord: session},
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "PodTracker")
+		os.Exit(1)
+	}
+	// +kubebuilder:scaffold:builder
 
 	if metricsCertWatcher != nil {
 		setupLog.Info("Adding metrics certificate watcher to manager")

@@ -6,7 +6,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"sigs.k8s.io/controller-runtime/pkg/log"
-	"vrungel.maxvk.com/controller/config/discord"
 )
 
 // var (
@@ -20,16 +19,11 @@ type DiscordBot struct {
 func (bot *DiscordBot) Start(ctx context.Context) error {
 
 	logger := log.FromContext(ctx)
-	Discord, err := discordgo.New("Bot " + discord.Token)
-	if err != nil {
-		panic(err)
-	}
 
-	bot.Discord = Discord
 	bot.Discord.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages
 	bot.Discord.State.MaxMessageCount = 50
 
-	err = bot.Discord.Open()
+	err := bot.Discord.Open()
 	logger.Info("Started Bot")
 	if err != nil {
 		logger.Error(err, "Could not start Bot")
@@ -53,7 +47,7 @@ func (bot *DiscordBot) Start(ctx context.Context) error {
 	return bot.Discord.Close()
 }
 
-func (bot *DiscordBot) discord_log(objName string) {
+func (bot *DiscordBot) DiscordLog(objName string) {
 
 	embed := &discordgo.MessageEmbed{
 		Author:      &discordgo.MessageEmbedAuthor{},

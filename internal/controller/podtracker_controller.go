@@ -19,7 +19,6 @@ package controller
 import (
 	"context"
 
-	"github.com/bwmarrin/discordgo"
 	rbacv1 "k8s.io/api/rbac/v1"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -30,13 +29,15 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+
+	bot "vrungel.maxvk.com/controller/internal/bot"
 )
 
 // PodTrackerReconciler reconciles a PodTracker object
 type PodTrackerReconciler struct {
 	client.Client
 	Scheme  *runtime.Scheme
-	Discord *discordgo.Session
+	Discord bot.DiscordBot
 }
 
 // +kubebuilder:rbac:groups=crd.vrungel.maxvk.com,resources=podtrackers,verbs=get;list;watch;create;update;patch;delete
@@ -66,7 +67,7 @@ func (r *PodTrackerReconciler) HandleRBACEvents(ctx context.Context, rb client.O
 
 	if rb.GetNamespace() == "default" {
 		logger.Info("Role binding found: " + rb.GetName())
-		// bot.DiscordBot
+		r.Discord.DiscordLog(rb.GetName())
 	}
 	return []reconcile.Request{}
 }

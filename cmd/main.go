@@ -41,7 +41,9 @@ import (
 	"vrungel.maxvk.com/controller/internal/controller"
 
 	// +kubebuilder:scaffold:imports
-	"vrungel.maxvk.com/controller/internal"
+	"github.com/bwmarrin/discordgo"
+	"vrungel.maxvk.com/controller/config/discord"
+	bot "vrungel.maxvk.com/controller/internal/bot"
 )
 
 var (
@@ -204,9 +206,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	session, err := discordgo.New("Bot " + discord.Token)
+
 	if err := (&controller.PodTrackerReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:  mgr.GetClient(),
+		Scheme:  mgr.GetScheme(),
+		Discord: session,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "PodTracker")
 		os.Exit(1)
@@ -214,7 +219,9 @@ func main() {
 	// +kubebuilder:scaffold:builder
 
 	// Add discord bot to manager
-	if err := mgr.Add((&internal.DiscordBot{})); err != nil {
+	if err := mgr.Add((&bot.DiscordBot{
+		Discord: session,
+	})); err != nil {
 		setupLog.Error(err, "unable to start Discord bot")
 		os.Exit(1)
 	}

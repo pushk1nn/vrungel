@@ -67,7 +67,7 @@ func (r *PodTrackerReconciler) HandleRBACEvents(ctx context.Context, rb client.O
 
 	if rb.GetNamespace() == "default" {
 		logger.Info("Role binding found: " + rb.GetName())
-		r.Discord.DiscordLog(rb.GetName())
+		r.Discord.DiscordLog(rb)
 	}
 	return []reconcile.Request{}
 }

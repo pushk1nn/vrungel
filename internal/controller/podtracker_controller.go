@@ -19,7 +19,7 @@ package controller
 import (
 	"context"
 
-	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -58,12 +58,12 @@ func (r *PodTrackerReconciler) Reconcile(ctx context.Context, req ctrl.Request) 
 	return ctrl.Result{}, nil
 }
 
-func (r *PodTrackerReconciler) HandleServiceAccountEvents(ctx context.Context, sa client.Object) []reconcile.Request {
+func (r *PodTrackerReconciler) HandleRBACEvents(ctx context.Context, rb client.Object) []reconcile.Request {
 
 	logger := log.FromContext(ctx)
 
-	if sa.GetNamespace() == "default" {
-		logger.Info("Event handler triggered!!!")
+	if rb.GetNamespace() == "default" {
+		logger.Info("Role binding found: " + rb.GetName())
 	}
 	return []reconcile.Request{}
 }
@@ -73,8 +73,8 @@ func (r *PodTrackerReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		Named("Vrungel").
 		Watches(
-			&corev1.ServiceAccount{},
-			handler.EnqueueRequestsFromMapFunc(r.HandleServiceAccountEvents),
+			&rbacv1.RoleBinding{},
+			handler.EnqueueRequestsFromMapFunc(r.HandleRBACEvents),
 			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
 		).
 		Complete(r)

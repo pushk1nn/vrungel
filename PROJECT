@@ -6,6 +6,7 @@ cliVersion: 4.6.0
 domain: vrungel.maxvk.com
 layout:
 - go.kubebuilder.io/v4
+multigroup: true
 projectName: vrungel
 repo: vrungel.maxvk.com/controller
 resources:
@@ -17,5 +18,14 @@ resources:
   group: crd
   kind: PodTracker
   path: vrungel.maxvk.com/controller/api/v1
+  version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: vrungel.maxvk.com
+  group: security
+  kind: RoleBindWatcher
+  path: vrungel.maxvk.com/controller/api/security/v1
   version: v1
 version: "3"

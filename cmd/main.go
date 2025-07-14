@@ -37,11 +37,15 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	crdv1 "vrungel.maxvk.com/controller/api/v1"
-	"vrungel.maxvk.com/controller/internal/controller"
+	crdv1 "vrungel.maxvk.com/controller/api/crd/v1"
+	controller "vrungel.maxvk.com/controller/internal/controller/crd"
+
+	securityv1 "vrungel.maxvk.com/controller/api/security/v1"
+	securitycontroller "vrungel.maxvk.com/controller/internal/controller/security"
 
 	// +kubebuilder:scaffold:imports
 	"github.com/bwmarrin/discordgo"
+
 	"vrungel.maxvk.com/controller/config/discord"
 	bot "vrungel.maxvk.com/controller/internal/bot"
 )
@@ -55,6 +59,7 @@ func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
 	utilruntime.Must(crdv1.AddToScheme(scheme))
+	utilruntime.Must(securityv1.AddToScheme(scheme))
 	// +kubebuilder:scaffold:scheme
 }
 
@@ -222,6 +227,13 @@ func main() {
 		Discord: bot.DiscordBot{Discord: session},
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "PodTracker")
+		os.Exit(1)
+	}
+	if err := (&securitycontroller.RoleBindWatcherReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "RoleBindWatcher")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder

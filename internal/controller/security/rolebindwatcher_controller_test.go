@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package controller
+package security
 
 import (
 	"context"
@@ -27,10 +27,10 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	crdv1 "vrungel.maxvk.com/controller/api/v1"
+	securityv1 "vrungel.maxvk.com/controller/api/security/v1"
 )
 
-var _ = Describe("PodTracker Controller", func() {
+var _ = Describe("RoleBindWatcher Controller", func() {
 	Context("When reconciling a resource", func() {
 		const resourceName = "test-resource"
 
@@ -40,13 +40,13 @@ var _ = Describe("PodTracker Controller", func() {
 			Name:      resourceName,
 			Namespace: "default", // TODO(user):Modify as needed
 		}
-		podtracker := &crdv1.PodTracker{}
+		rolebindwatcher := &securityv1.RoleBindWatcher{}
 
 		BeforeEach(func() {
-			By("creating the custom resource for the Kind PodTracker")
-			err := k8sClient.Get(ctx, typeNamespacedName, podtracker)
+			By("creating the custom resource for the Kind RoleBindWatcher")
+			err := k8sClient.Get(ctx, typeNamespacedName, rolebindwatcher)
 			if err != nil && errors.IsNotFound(err) {
-				resource := &crdv1.PodTracker{
+				resource := &securityv1.RoleBindWatcher{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: "default",
@@ -59,16 +59,16 @@ var _ = Describe("PodTracker Controller", func() {
 
 		AfterEach(func() {
 			// TODO(user): Cleanup logic after each test, like removing the resource instance.
-			resource := &crdv1.PodTracker{}
+			resource := &securityv1.RoleBindWatcher{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 
-			By("Cleanup the specific resource instance PodTracker")
+			By("Cleanup the specific resource instance RoleBindWatcher")
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 		})
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
-			controllerReconciler := &PodTrackerReconciler{
+			controllerReconciler := &RoleBindWatcherReconciler{
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
 			}

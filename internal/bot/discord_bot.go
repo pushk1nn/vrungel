@@ -88,7 +88,7 @@ func objType(obj client.Object) string {
 		return "Role"
 	case *rbacv1.ClusterRole:
 		return "ClusterRole"
+	default:
+		return "UnknownType"
 	}
-
-	return "UnknownType"
 }

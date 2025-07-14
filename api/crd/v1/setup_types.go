@@ -20,19 +20,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type Reporter struct {
-	Kind    string `json:"kind,omitempty"`
-	Key     string `json:"key,omitempty"`
-	Channel string `json:"channel,omitempty"`
+// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
+// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+
+// SetupSpec defines the desired state of Setup.
+type SetupSpec struct {
+	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
+
+	// Foo is an example field of Setup. Edit setup_types.go to remove/update
+	Foo string `json:"foo,omitempty"`
 }
 
-type PodTrackerSpec struct {
-	Name   string   `json:"name,omitempty"`
-	Report Reporter `json:"report,omitempty"`
-}
-
-// PodTrackerStatus defines the observed state of PodTracker.
-type PodTrackerStatus struct {
+// SetupStatus defines the observed state of Setup.
+type SetupStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 }
@@ -40,24 +41,24 @@ type PodTrackerStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// PodTracker is the Schema for the podtrackers API.
-type PodTracker struct {
+// Setup is the Schema for the setups API.
+type Setup struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   PodTrackerSpec   `json:"spec,omitempty"`
-	Status PodTrackerStatus `json:"status,omitempty"`
+	Spec   SetupSpec   `json:"spec,omitempty"`
+	Status SetupStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// PodTrackerList contains a list of PodTracker.
-type PodTrackerList struct {
+// SetupList contains a list of Setup.
+type SetupList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []PodTracker `json:"items"`
+	Items           []Setup `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&PodTracker{}, &PodTrackerList{})
+	SchemeBuilder.Register(&Setup{}, &SetupList{})
 }

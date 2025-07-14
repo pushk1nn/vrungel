@@ -30,3 +30,29 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - security.vrungel.maxvk.com
+  resources:
+  - rolebindwatchers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - security.vrungel.maxvk.com
+  resources:
+  - rolebindwatchers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - security.vrungel.maxvk.com
+  resources:
+  - rolebindwatchers/status
+  verbs:
+  - get
+  - patch
+  - update

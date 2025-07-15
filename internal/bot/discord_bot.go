@@ -1,6 +1,7 @@
 package bot
 
 import (
+	// "context"
 	"fmt"
 	"sync"
 	"time"
@@ -8,6 +9,7 @@ import (
 	"github.com/bwmarrin/discordgo"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	// "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 type DiscordBotManager struct {
@@ -18,6 +20,15 @@ type DiscordBotManager struct {
 func NewDiscordBotManager() *DiscordBotManager {
 	return &DiscordBotManager{}
 }
+
+// func (d *DiscordBotManager) Start(ctx context.Context) error {
+// 	logger := log.FromContext(ctx)
+
+// 	<-ctx.Done()
+// 	logger.Info("Stopping bot")
+
+// 	return d.session.Close()
+// }
 
 func (d *DiscordBotManager) SetSession(s *discordgo.Session) {
 	d.mu.Lock()

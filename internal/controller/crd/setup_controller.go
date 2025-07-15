@@ -68,20 +68,18 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		logger.Error(err, "unable to start discord session")
 	}
 
+	session.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages
+	session.State.MaxMessageCount = 50
+
 	err = session.Open()
 	if err != nil {
-		logger.Error(err, "unable to open discord session")
+		logger.Error(err, "unable to start discordgo session")
 	}
+	logger.Info("started discordgo session")
 
 	r.BotManager.SetSession(session)
 
-	logger.Info("discordgo session started successfully")
-	// meta.SetStatusCondition(&setupList.Items[0].Status.Conditions, metav1.Condition{
-	// 	Type:    "Ready",
-	// 	Status:  metav1.ConditionTrue,
-	// 	Reason:  "BotSessionEstablished",
-	// 	Message: "Discord bot session established successfully",
-	// })
+	logger.Info("discordgo session created successfully")
 
 	return ctrl.Result{}, nil
 }

@@ -208,16 +208,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// session, _ := discordgo.New("Bot " + discord.Token)
-
-	// Add discord bot to manager
-	// if err := mgr.Add((&bot.DiscordBot{
-	// 	Discord: session,
-	// })); err != nil {
-	// 	setupLog.Error(err, "unable to start Discord bot")
-	// 	os.Exit(1)
-	// }
-
 	discordBotManager := bot.NewDiscordBotManager()
 
 	if err := (&crdcontroller.SetupReconciler{
@@ -268,4 +258,10 @@ func main() {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+
+	if err := discordBotManager.GetSession().Close(); err != nil {
+		setupLog.Error(err, "problem stopping discord bot")
+		os.Exit(1)
+	}
+	setupLog.Info("Stopped bot")
 }

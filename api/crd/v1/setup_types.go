@@ -26,13 +26,14 @@ type Reporter struct {
 	Channel string `json:"channel,omitempty"`
 }
 
-type PodTrackerSpec struct {
+// SetupSpec defines the desired state of Setup.
+type SetupSpec struct {
 	Name   string   `json:"name,omitempty"`
 	Report Reporter `json:"report,omitempty"`
 }
 
-// PodTrackerStatus defines the observed state of PodTracker.
-type PodTrackerStatus struct {
+// SetupStatus defines the observed state of Setup.
+type SetupStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 }
@@ -40,24 +41,24 @@ type PodTrackerStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// PodTracker is the Schema for the podtrackers API.
-type PodTracker struct {
+// Setup is the Schema for the setups API.
+type Setup struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   PodTrackerSpec   `json:"spec,omitempty"`
-	Status PodTrackerStatus `json:"status,omitempty"`
+	Spec   SetupSpec   `json:"spec,omitempty"`
+	Status SetupStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// PodTrackerList contains a list of PodTracker.
-type PodTrackerList struct {
+// SetupList contains a list of Setup.
+type SetupList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []PodTracker `json:"items"`
+	Items           []Setup `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&PodTracker{}, &PodTrackerList{})
+	SchemeBuilder.Register(&Setup{}, &SetupList{})
 }

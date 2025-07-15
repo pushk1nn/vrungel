@@ -1,5 +1,5 @@
 ## Append samples of your project ##
 resources:
-- crd_v1_podtracker.yaml
 - security_v1_rolebindwatcher.yaml
+- crd_v1_setup.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

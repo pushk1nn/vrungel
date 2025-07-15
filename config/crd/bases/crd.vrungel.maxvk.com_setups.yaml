@@ -4,20 +4,20 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.18.0
-  name: podtrackers.crd.vrungel.maxvk.com
+  name: setups.crd.vrungel.maxvk.com
 spec:
   group: crd.vrungel.maxvk.com
   names:
-    kind: PodTracker
-    listKind: PodTrackerList
-    plural: podtrackers
-    singular: podtracker
+    kind: Setup
+    listKind: SetupList
+    plural: setups
+    singular: setup
   scope: Namespaced
   versions:
   - name: v1
     schema:
       openAPIV3Schema:
-        description: PodTracker is the Schema for the podtrackers API.
+        description: Setup is the Schema for the setups API.
         properties:
           apiVersion:
             description: |-
@@ -37,6 +37,7 @@ spec:
           metadata:
             type: object
           spec:
+            description: SetupSpec defines the desired state of Setup.
             properties:
               name:
                 type: string
@@ -51,7 +52,7 @@ spec:
                 type: object
             type: object
           status:
-            description: PodTrackerStatus defines the observed state of PodTracker.
+            description: SetupStatus defines the observed state of Setup.
             type: object
         type: object
     served: true

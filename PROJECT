@@ -15,17 +15,17 @@ resources:
     namespaced: true
   controller: true
   domain: vrungel.maxvk.com
-  group: crd
-  kind: PodTracker
-  path: vrungel.maxvk.com/controller/api/v1
+  group: security
+  kind: RoleBindWatcher
+  path: vrungel.maxvk.com/controller/api/security/v1
   version: v1
 - api:
     crdVersion: v1
     namespaced: true
   controller: true
   domain: vrungel.maxvk.com
-  group: security
-  kind: RoleBindWatcher
-  path: vrungel.maxvk.com/controller/api/security/v1
+  group: crd
+  kind: Setup
+  path: vrungel.maxvk.com/controller/api/crd/v1
   version: v1
 version: "3"

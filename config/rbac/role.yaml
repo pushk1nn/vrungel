@@ -7,7 +7,7 @@ rules:
 - apiGroups:
   - crd.vrungel.maxvk.com
   resources:
-  - podtrackers
+  - setups
   verbs:
   - create
   - delete
@@ -19,13 +19,13 @@ rules:
 - apiGroups:
   - crd.vrungel.maxvk.com
   resources:
-  - podtrackers/finalizers
+  - setups/finalizers
   verbs:
   - update
 - apiGroups:
   - crd.vrungel.maxvk.com
   resources:
-  - podtrackers/status
+  - setups/status
   verbs:
   - get
   - patch

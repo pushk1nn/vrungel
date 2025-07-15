@@ -210,6 +210,11 @@ func main() {
 
 	discordBotManager := bot.NewDiscordBotManager()
 
+	if err := mgr.Add(discordBotManager); err != nil {
+		setupLog.Error(err, "unable to add bot manager as runnable")
+		os.Exit(1)
+	}
+
 	if err := (&crdcontroller.SetupReconciler{
 		Client:     mgr.GetClient(),
 		Scheme:     mgr.GetScheme(),
@@ -259,9 +264,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := discordBotManager.GetSession().Close(); err != nil {
-		setupLog.Error(err, "problem stopping discord bot")
-		os.Exit(1)
-	}
-	setupLog.Info("Stopped bot")
+	// if err := discordBotManager.GetSession().Close(); err != nil {
+	// 	setupLog.Error(err, "problem stopping discord bot")
+	// 	os.Exit(1)
+	// }
+	// setupLog.Info("Stopped bot")
 }

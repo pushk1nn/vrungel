@@ -22,15 +22,17 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	crdv1 "vrungel.maxvk.com/controller/api/crd/v1"
+	"vrungel.maxvk.com/controller/internal/bot"
 )
 
 // SetupReconciler reconciles a Setup object
 type SetupReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme  *runtime.Scheme
+	Discord bot.DiscordBot
 }
 
 // +kubebuilder:rbac:groups=crd.vrungel.maxvk.com,resources=setups,verbs=get;list;watch;create;update;patch;delete
@@ -47,9 +49,9 @@ type SetupReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.21.0/pkg/reconcile
 func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = logf.FromContext(ctx)
+	logger := log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	logger.Info("Discord Bot started")
 
 	return ctrl.Result{}, nil
 }

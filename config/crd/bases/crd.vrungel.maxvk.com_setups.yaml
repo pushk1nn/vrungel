@@ -39,10 +39,17 @@ spec:
           spec:
             description: SetupSpec defines the desired state of Setup.
             properties:
-              foo:
-                description: Foo is an example field of Setup. Edit setup_types.go
-                  to remove/update
+              name:
                 type: string
+              report:
+                properties:
+                  channel:
+                    type: string
+                  key:
+                    type: string
+                  kind:
+                    type: string
+                type: object
             type: object
           status:
             description: SetupStatus defines the observed state of Setup.

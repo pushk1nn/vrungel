@@ -221,26 +221,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	// if err := (&controller.PodTrackerReconciler{
-	// 	Client:  mgr.GetClient(),
-	// 	Scheme:  mgr.GetScheme(),
-	// 	Discord: bot.DiscordBot{Discord: session},
-	// }).SetupWithManager(mgr); err != nil {
-	// 	setupLog.Error(err, "unable to create controller", "controller", "PodTracker")
-	// 	os.Exit(1)
-	//}
-	if err := (&securitycontroller.RoleBindWatcherReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "RoleBindWatcher")
-		os.Exit(1)
-	}
 	if err := (&crdcontroller.SetupReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:  mgr.GetClient(),
+		Scheme:  mgr.GetScheme(),
+		Discord: bot.DiscordBot{Discord: session},
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Setup")
+		os.Exit(1)
+	}
+	if err := (&securitycontroller.RoleBindWatcherReconciler{
+		Client:  mgr.GetClient(),
+		Scheme:  mgr.GetScheme(),
+		Discord: bot.DiscordBot{Discord: session},
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "RoleBindWatcher")
 		os.Exit(1)
 	}
 	// +kubebuilder:scaffold:builder

@@ -1,9 +1,0 @@
-apiVersion: crd.vrungel.maxvk.com/v1
-kind: PodTracker
-metadata:
-  labels:
-    app.kubernetes.io/name: vrungel
-    app.kubernetes.io/managed-by: kustomize
-  name: podtracker-sample
-spec:
-  # TODO(user): Add fields here

@@ -21,8 +21,13 @@ import (
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"vrungel.maxvk.com/controller/internal/bot"
 
 	// securityv1 "vrungel.maxvk.com/controller/api/security/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -31,7 +36,8 @@ import (
 // RoleBindWatcherReconciler reconciles a RoleBindWatcher object
 type RoleBindWatcherReconciler struct {
 	client.Client
-	Scheme *runtime.Scheme
+	Scheme  *runtime.Scheme
+	Discord bot.DiscordBot
 }
 
 // +kubebuilder:rbac:groups=security.vrungel.maxvk.com,resources=rolebindwatchers,verbs=get;list;watch;create;update;patch;delete
@@ -48,17 +54,32 @@ type RoleBindWatcherReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.21.0/pkg/reconcile
 func (r *RoleBindWatcherReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = logf.FromContext(ctx)
+	_ = log.FromContext(ctx)
 
 	// TODO(user): your logic here
 
 	return ctrl.Result{}, nil
 }
 
+func (r *RoleBindWatcherReconciler) HandleRBACEvents(ctx context.Context, rb client.Object) []reconcile.Request {
+
+	logger := log.FromContext(ctx)
+
+	if rb.GetNamespace() == "default" {
+		logger.Info("Role binding found: " + rb.GetName())
+		r.Discord.DiscordLog(rb)
+	}
+	return []reconcile.Request{}
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *RoleBindWatcherReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&rbacv1.RoleBinding{}).
+		Watches(
+			&rbacv1.RoleBinding{},
+			handler.EnqueueRequestsFromMapFunc(r.HandleRBACEvents),
+			builder.WithPredicates(predicate.ResourceVersionChangedPredicate{}),
+		).
 		Named("security-rolebindwatcher").
 		Complete(r)
 }

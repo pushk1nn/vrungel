@@ -40,14 +40,11 @@ import (
 	crdv1 "vrungel.maxvk.com/controller/api/crd/v1"
 
 	securityv1 "vrungel.maxvk.com/controller/api/security/v1"
+	"vrungel.maxvk.com/controller/internal/bot"
 	securitycontroller "vrungel.maxvk.com/controller/internal/controller/security"
 
 	crdcontroller "vrungel.maxvk.com/controller/internal/controller/crd"
 	// +kubebuilder:scaffold:imports
-	"github.com/bwmarrin/discordgo"
-
-	"vrungel.maxvk.com/controller/config/discord"
-	bot "vrungel.maxvk.com/controller/internal/bot"
 )
 
 var (
@@ -211,28 +208,30 @@ func main() {
 		os.Exit(1)
 	}
 
-	session, _ := discordgo.New("Bot " + discord.Token)
+	// session, _ := discordgo.New("Bot " + discord.Token)
 
 	// Add discord bot to manager
-	if err := mgr.Add((&bot.DiscordBot{
-		Discord: session,
-	})); err != nil {
-		setupLog.Error(err, "unable to start Discord bot")
-		os.Exit(1)
-	}
+	// if err := mgr.Add((&bot.DiscordBot{
+	// 	Discord: session,
+	// })); err != nil {
+	// 	setupLog.Error(err, "unable to start Discord bot")
+	// 	os.Exit(1)
+	// }
+
+	discordBotManager := bot.NewDiscordBotManager()
 
 	if err := (&crdcontroller.SetupReconciler{
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
-		Discord: bot.DiscordBot{Discord: session},
+		Client:     mgr.GetClient(),
+		Scheme:     mgr.GetScheme(),
+		BotManager: discordBotManager,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Setup")
 		os.Exit(1)
 	}
 	if err := (&securitycontroller.RoleBindWatcherReconciler{
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
-		Discord: bot.DiscordBot{Discord: session},
+		Client:     mgr.GetClient(),
+		Scheme:     mgr.GetScheme(),
+		BotManager: discordBotManager,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "RoleBindWatcher")
 		os.Exit(1)

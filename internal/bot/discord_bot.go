@@ -1,58 +1,37 @@
 package bot
 
 import (
-	"context"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
-// var (
-// 	Discord *discordgo.Discord
-// )
-
-type DiscordBot struct {
-	Discord *discordgo.Session
+type DiscordBotManager struct {
+	mu      sync.RWMutex
+	session *discordgo.Session
 }
 
-func (bot *DiscordBot) Start(ctx context.Context) error {
-
-	logger := log.FromContext(ctx)
-
-	bot.Discord.Identify.Intents = discordgo.IntentsGuilds | discordgo.IntentsGuildMessages
-	bot.Discord.State.MaxMessageCount = 50
-
-	err := bot.Discord.Open()
-	logger.Info("Started Bot")
-	if err != nil {
-		logger.Error(err, "Could not start Bot")
-	}
-
-	// Startup action
-
-	// _, err = bot.Discord.ChannelMessageSend("1392648744532443220", "Vrungel is starting...")
-	// if err != nil {
-	// 	logger.Error(err, "Could not send startup message")
-	// }
-
-	<-ctx.Done()
-	logger.Info("Stopping Bot")
-
-	// Shutdown action
-
-	// _, err = bot.Discord.ChannelMessageSend("1392648744532443220", "Vrungel is stopping... Goodbye")
-	// if err != nil {
-	// 	logger.Error(err, "Could not send shutdown message")
-	// }
-
-	return bot.Discord.Close()
+func NewDiscordBotManager() *DiscordBotManager {
+	return &DiscordBotManager{}
 }
 
-func (bot *DiscordBot) DiscordLog(obj client.Object) {
+func (d *DiscordBotManager) SetSession(s *discordgo.Session) {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	d.session = s
+}
+
+func (d *DiscordBotManager) GetSession() *discordgo.Session {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	return d.session
+}
+
+func (d *DiscordBotManager) DiscordLog(obj client.Object) {
 
 	embed := &discordgo.MessageEmbed{
 		Author:      &discordgo.MessageEmbedAuthor{},
@@ -75,7 +54,7 @@ func (bot *DiscordBot) DiscordLog(obj client.Object) {
 		Title:     "Resource Creation",
 	}
 
-	bot.Discord.ChannelMessageSendEmbed("1393623353830412358", embed)
+	d.GetSession().ChannelMessageSendEmbed("1393623353830412358", embed)
 }
 
 func objType(obj client.Object) string {

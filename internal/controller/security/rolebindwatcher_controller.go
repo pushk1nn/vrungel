@@ -18,9 +18,12 @@ package security
 
 import (
 	"context"
+	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
+
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -36,8 +39,8 @@ import (
 // RoleBindWatcherReconciler reconciles a RoleBindWatcher object
 type RoleBindWatcherReconciler struct {
 	client.Client
-	Scheme  *runtime.Scheme
-	Discord bot.DiscordBot
+	Scheme     *runtime.Scheme
+	BotManager *bot.DiscordBotManager
 }
 
 // +kubebuilder:rbac:groups=security.vrungel.maxvk.com,resources=rolebindwatchers,verbs=get;list;watch;create;update;patch;delete
@@ -54,9 +57,20 @@ type RoleBindWatcherReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.21.0/pkg/reconcile
 func (r *RoleBindWatcherReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	logger := log.FromContext(ctx)
 
-	// TODO(user): your logic here
+	if r.BotManager.GetSession() == nil {
+		logger.Info("discordgo session not ready, requeuing reconcile request for: ")
+		return ctrl.Result{RequeueAfter: time.Second * 3}, nil
+	}
+
+	var rb rbacv1.RoleBinding
+
+	if err := r.Client.Get(ctx, req.NamespacedName, &rb); err != nil {
+		logger.Info("discordgo session not ready, requeuing reconcile request for: ")
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+	r.BotManager.DiscordLog(&rb)
 
 	return ctrl.Result{}, nil
 }
@@ -67,7 +81,12 @@ func (r *RoleBindWatcherReconciler) HandleRBACEvents(ctx context.Context, rb cli
 
 	if rb.GetNamespace() == "default" {
 		logger.Info("Role binding found: " + rb.GetName())
-		r.Discord.DiscordLog(rb)
+		return []reconcile.Request{{
+			NamespacedName: types.NamespacedName{
+				Name:      rb.GetName(),
+				Namespace: rb.GetNamespace(),
+			},
+		}}
 	}
 	return []reconcile.Request{}
 }

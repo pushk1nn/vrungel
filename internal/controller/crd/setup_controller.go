@@ -19,6 +19,7 @@ package crd
 import (
 	"context"
 
+	"github.com/bwmarrin/discordgo"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -31,8 +32,8 @@ import (
 // SetupReconciler reconciles a Setup object
 type SetupReconciler struct {
 	client.Client
-	Scheme  *runtime.Scheme
-	Discord bot.DiscordBot
+	Scheme     *runtime.Scheme
+	BotManager *bot.DiscordBotManager
 }
 
 // +kubebuilder:rbac:groups=crd.vrungel.maxvk.com,resources=setups,verbs=get;list;watch;create;update;patch;delete
@@ -51,7 +52,36 @@ type SetupReconciler struct {
 func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
-	logger.Info("Discord Bot started")
+	logger.Info("Starting discordgo session...")
+
+	var setupList crdv1.SetupList
+
+	if err := r.List(ctx, &setupList); err != nil {
+		logger.Error(err, "unable to fetch setup-controller list")
+		return ctrl.Result{}, client.IgnoreNotFound(err)
+	}
+
+	token := setupList.Items[0].Spec.Report.Key
+
+	session, err := discordgo.New("Bot " + token)
+	if err != nil {
+		logger.Error(err, "unable to start discord session")
+	}
+
+	err = session.Open()
+	if err != nil {
+		logger.Error(err, "unable to open discord session")
+	}
+
+	r.BotManager.SetSession(session)
+
+	logger.Info("discordgo session started successfully")
+	// meta.SetStatusCondition(&setupList.Items[0].Status.Conditions, metav1.Condition{
+	// 	Type:    "Ready",
+	// 	Status:  metav1.ConditionTrue,
+	// 	Reason:  "BotSessionEstablished",
+	// 	Message: "Discord bot session established successfully",
+	// })
 
 	return ctrl.Result{}, nil
 }

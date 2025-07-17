@@ -1,0 +1,11 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: DangerousRoleBinding
+metadata:
+  name: disallow-role-blacklist
+spec:
+  match:
+    kinds:
+      - apiGroups: ["rbac.authorization.k8s.io"]
+        kinds: ["RoleBinding"]
+  parameters:
+    blacklist: ["dangerous-role"]

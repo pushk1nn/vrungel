@@ -1,0 +1,28 @@
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: dangerousrolebinding
+spec:
+  crd:
+    spec:
+      names:
+        kind: DangerousRoleBinding
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            blacklist:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package dangerousrolebinding
+
+        violation[{"msg": msg, "details": {"dangerous_role": role}}] {
+          role := input.review.object.roleRef.name
+          restricted := {r | r := input.parameters.blacklist[_]}
+          role == "dangerous-role"
+          msg := sprintf("cannot use the dangerous role: %v", [role])
+        }

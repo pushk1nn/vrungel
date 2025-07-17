@@ -44,6 +44,7 @@ import (
 	securitycontroller "vrungel.maxvk.com/controller/internal/controller/security"
 
 	crdcontroller "vrungel.maxvk.com/controller/internal/controller/crd"
+	webhooksecurityv1 "vrungel.maxvk.com/controller/internal/webhook/security/v1"
 	// +kubebuilder:scaffold:imports
 )
 
@@ -230,6 +231,13 @@ func main() {
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "RoleBindWatcher")
 		os.Exit(1)
+	}
+	// nolint:goconst
+	if os.Getenv("ENABLE_WEBHOOKS") != "false" {
+		if err := webhooksecurityv1.SetupRoleBindWatcherWebhookWithManager(mgr); err != nil {
+			setupLog.Error(err, "unable to create webhook", "webhook", "RoleBindWatcher")
+			os.Exit(1)
+		}
 	}
 	// +kubebuilder:scaffold:builder
 

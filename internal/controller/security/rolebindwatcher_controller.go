@@ -47,15 +47,6 @@ type RoleBindWatcherReconciler struct {
 // +kubebuilder:rbac:groups=security.vrungel.maxvk.com,resources=rolebindwatchers/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=security.vrungel.maxvk.com,resources=rolebindwatchers/finalizers,verbs=update
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the RoleBindWatcher object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.21.0/pkg/reconcile
 func (r *RoleBindWatcherReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
@@ -67,7 +58,7 @@ func (r *RoleBindWatcherReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	var rb rbacv1.RoleBinding
 
 	if err := r.Client.Get(ctx, req.NamespacedName, &rb); err != nil {
-		logger.Info("discordgo session not ready, requeuing reconcile request for: ")
+		logger.Info("could not find role binding object")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 	r.BotManager.DiscordLog(&rb)

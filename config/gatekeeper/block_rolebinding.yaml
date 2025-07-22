@@ -22,7 +22,7 @@ spec:
 
         violation[{"msg": msg, "details": {"dangerous_role": role}}] {
           role := input.review.object.roleRef.name
-          restricted := {r | r := input.parameters.blacklist[_]}
-          role == "dangerous-role"
+          restricted := {r | r := input.parameters.blacklist[role]}
+          role_blocked := count(restricted) > 0
           msg := sprintf("cannot use the dangerous role: %v", [role])
         }

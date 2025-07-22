@@ -40,15 +40,6 @@ type SetupReconciler struct {
 // +kubebuilder:rbac:groups=crd.vrungel.maxvk.com,resources=setups/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=crd.vrungel.maxvk.com,resources=setups/finalizers,verbs=update
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Setup object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.21.0/pkg/reconcile
 func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
@@ -77,11 +68,36 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 	logger.Info("started discordgo session")
 
+	session.AddHandler(
+		func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			if i.Type == discordgo.InteractionMessageComponent {
+				switch i.MessageComponentData().CustomID {
+				case "create_constraint":
+					HandleCreateConstraint(s, i)
+				}
+			}
+		},
+	)
+
 	r.BotManager.SetSession(session)
 
 	logger.Info("discordgo session created successfully")
 
 	return ctrl.Result{}, nil
+}
+
+func HandleCreateConstraint(s *discordgo.Session, i *discordgo.InteractionCreate) {
+
+	// Respond to the interaction
+	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: "Button clicked! Action triggered.",
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
 }
 
 // SetupWithManager sets up the controller with the Manager.

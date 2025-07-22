@@ -45,7 +45,7 @@ func (d *DiscordBotManager) GetSession() *discordgo.Session {
 	return d.session
 }
 
-func (d *DiscordBotManager) DiscordLog(obj client.Object) *discordgo.Message {
+func (d *DiscordBotManager) DiscordLog(ctx context.Context, obj client.Object) *discordgo.Message {
 
 	message, err := d.GetSession().ChannelMessageSendComplex(
 		"1393623353830412358",

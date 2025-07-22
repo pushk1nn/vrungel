@@ -73,7 +73,7 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 			if i.Type == discordgo.InteractionMessageComponent {
 				switch i.MessageComponentData().CustomID {
 				case "create_constraint":
-					HandleCreateConstraint(s, i)
+					r.BotManager.HandleCreateConstraint(s, i)
 				}
 			}
 		},
@@ -84,20 +84,6 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	logger.Info("discordgo session created successfully")
 
 	return ctrl.Result{}, nil
-}
-
-func HandleCreateConstraint(s *discordgo.Session, i *discordgo.InteractionCreate) {
-
-	// Respond to the interaction
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: "Button clicked! Action triggered.",
-		},
-	})
-	if err != nil {
-		panic(err)
-	}
 }
 
 // SetupWithManager sets up the controller with the Manager.

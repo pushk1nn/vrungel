@@ -93,6 +93,20 @@ func (d *DiscordBotManager) DiscordLog(ctx context.Context, obj client.Object) *
 	return message
 }
 
+func (d *DiscordBotManager) HandleCreateConstraint(s *discordgo.Session, i *discordgo.InteractionCreate) {
+
+	// Respond to the interaction
+	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+		Type: discordgo.InteractionResponseChannelMessageWithSource,
+		Data: &discordgo.InteractionResponseData{
+			Content: "Button clicked! Action triggered.",
+		},
+	})
+	if err != nil {
+		panic(err)
+	}
+}
+
 func objType(obj client.Object) string {
 
 	switch obj.(type) {

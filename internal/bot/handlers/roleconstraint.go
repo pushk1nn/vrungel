@@ -8,13 +8,18 @@ import (
 	"text/template"
 
 	"github.com/bwmarrin/discordgo"
+	"vrungel.maxvk.com/controller/internal/bot/git"
 )
+
+type HandlerManager struct {
+	GitManager *git.GitManager
+}
 
 type Constraint struct {
 	Role string
 }
 
-func RoleConstraint(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func (h *HandlerManager) RoleConstraint(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 	// Decode interaction data
 	req := strings.SplitN(i.MessageComponentData().CustomID, ":", 2)[1]
@@ -45,6 +50,8 @@ func RoleConstraint(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
 	tmpl.Execute(f, constraint)
 	f.Close()
+
+	h.GitManager.Commit()
 
 	// Respond to the interaction
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

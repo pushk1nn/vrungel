@@ -21,6 +21,7 @@ import (
 	"strings"
 
 	"github.com/bwmarrin/discordgo"
+	gogit "github.com/go-git/go-git/v6"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -28,6 +29,7 @@ import (
 
 	crdv1 "vrungel.maxvk.com/controller/api/crd/v1"
 	"vrungel.maxvk.com/controller/internal/bot"
+	"vrungel.maxvk.com/controller/internal/bot/git"
 	"vrungel.maxvk.com/controller/internal/bot/handlers"
 )
 
@@ -70,6 +72,8 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 	logger.Info("started discordgo session")
 
+	g := InitGitManager()
+
 	session.AddHandler(
 		func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			if i.Type == discordgo.InteractionMessageComponent {
@@ -77,9 +81,13 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 				// prefix will be the name of the handler without the base64 encoded info used for handling the request
 				prefix := strings.SplitN(i.MessageComponentData().CustomID, ":", 2)[0]
 
+				h := &handlers.HandlerManager{
+					GitManager: g,
+				}
+
 				switch prefix {
 				case "role_constraint":
-					handlers.RoleConstraint(s, i)
+					h.RoleConstraint(s, i)
 				}
 			}
 		},
@@ -90,6 +98,23 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	logger.Info("discordgo session created successfully")
 
 	return ctrl.Result{}, nil
+}
+
+func InitGitManager() *git.GitManager {
+	path := "/tmp/vrungel-automation"
+
+	r, err := gogit.PlainClone(path, &gogit.CloneOptions{
+		URL:               "https://github.com/pushk1nn/argocd-test.git",
+		RecurseSubmodules: gogit.DefaultSubmoduleRecursionDepth,
+	})
+	if err != nil {
+		panic(err)
+	}
+
+	return &git.GitManager{
+		Path: path,
+		Repo: r,
+	}
 }
 
 // SetupWithManager sets up the controller with the Manager.

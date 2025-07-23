@@ -2,6 +2,7 @@ package bot
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"sync"
 	"time"
@@ -45,30 +46,59 @@ func (d *DiscordBotManager) GetSession() *discordgo.Session {
 	return d.session
 }
 
-func (d *DiscordBotManager) DiscordLog(obj client.Object) {
+func (d *DiscordBotManager) DiscordLog(ctx context.Context, obj client.Object) *discordgo.Message {
 
-	embed := &discordgo.MessageEmbed{
-		Author:      &discordgo.MessageEmbedAuthor{},
-		Color:       0x00ff00, // Green
-		Description: fmt.Sprintf("A %s has been created in namespace %s", objType(obj), obj.GetNamespace()),
-		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:   "Kind",
-				Value:  obj.GetName(),
-				Inline: true,
+	message, err := d.GetSession().ChannelMessageSendComplex(
+		"1393623353830412358",
+		&discordgo.MessageSend{
+			Embeds: []*discordgo.MessageEmbed{
+				{
+					Author:      &discordgo.MessageEmbedAuthor{},
+					Color:       0x00ff00, // Green
+					Description: fmt.Sprintf("A %s has been created in namespace %s", objType(obj), obj.GetNamespace()),
+					Fields: []*discordgo.MessageEmbedField{
+						{
+							Name:   "Kind",
+							Value:  obj.GetName(),
+							Inline: true,
+						},
+					},
+					Image: &discordgo.MessageEmbedImage{
+						URL: "https://cdn.discordapp.com/avatars/119249192806776836/cc32c5c3ee602e1fe252f9f595f9010e.jpg?size=2048",
+					},
+					Thumbnail: &discordgo.MessageEmbedThumbnail{
+						URL: "https://cdn.discordapp.com/avatars/119249192806776836/cc32c5c3ee602e1fe252f9f595f9010e.jpg?size=2048",
+					},
+					Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
+					Title:     "Resource Creation",
+				},
+			},
+			Components: []discordgo.MessageComponent{
+				discordgo.ActionsRow{
+					Components: []discordgo.MessageComponent{
+						discordgo.Button{
+							Label:    "Block Role Binding",
+							Style:    discordgo.PrimaryButton,
+							CustomID: fmt.Sprintf("role_constraint:%s", EncodeConstraint(obj)),
+						},
+					},
+				},
 			},
 		},
-		Image: &discordgo.MessageEmbedImage{
-			URL: "https://cdn.discordapp.com/avatars/119249192806776836/cc32c5c3ee602e1fe252f9f595f9010e.jpg?size=2048",
-		},
-		Thumbnail: &discordgo.MessageEmbedThumbnail{
-			URL: "https://cdn.discordapp.com/avatars/119249192806776836/cc32c5c3ee602e1fe252f9f595f9010e.jpg?size=2048",
-		},
-		Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
-		Title:     "Resource Creation",
+	)
+
+	if err != nil {
+		panic(err)
 	}
 
-	d.GetSession().ChannelMessageSendEmbed("1393623353830412358", embed)
+	return message
+}
+
+func EncodeConstraint(obj client.Object) string {
+	raw := fmt.Sprintf("%s|%s|%s", obj.GetNamespace(), objType(obj), obj.GetName())
+	encoded := base64.StdEncoding.EncodeToString([]byte(raw))
+
+	return encoded
 }
 
 func objType(obj client.Object) string {

@@ -61,7 +61,7 @@ func (r *RoleBindWatcherReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 		logger.Info("could not find role binding object")
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
-	r.BotManager.DiscordLog(&rb)
+	r.BotManager.DiscordLog(ctx, &rb)
 
 	return ctrl.Result{}, nil
 }

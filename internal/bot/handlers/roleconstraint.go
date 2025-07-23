@@ -41,8 +41,8 @@ func (h *HandlerManager) RoleConstraint(s *discordgo.Session, i *discordgo.Inter
 		panic(err)
 	}
 
-	output := "/tmp/generated/constraint.yaml"
-	os.MkdirAll("/tmp/generated", 0755)
+	output := "/tmp/vrungel-automation/constraint.yaml"
+	// os.MkdirAll("/tmp/generated", 0755)
 	f, err := os.Create(output)
 	if err != nil {
 		panic(err)
@@ -51,7 +51,8 @@ func (h *HandlerManager) RoleConstraint(s *discordgo.Session, i *discordgo.Inter
 	tmpl.Execute(f, constraint)
 	f.Close()
 
-	h.GitManager.Commit()
+	h.GitManager.Commit("constraint.yaml")
+	h.GitManager.Push()
 
 	// Respond to the interaction
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

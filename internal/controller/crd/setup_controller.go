@@ -22,6 +22,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	gogit "github.com/go-git/go-git/v6"
+	"github.com/go-git/go-git/v6/plumbing/transport/http"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -114,6 +115,10 @@ func InitGitManager() *git.GitManager {
 	return &git.GitManager{
 		Path: path,
 		Repo: r,
+		Auth: &http.BasicAuth{
+			Username: "vrungel",
+			Password: "",
+		},
 	}
 }
 

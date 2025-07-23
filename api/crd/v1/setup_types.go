@@ -26,10 +26,16 @@ type Reporter struct {
 	Channel string `json:"channel,omitempty"`
 }
 
+type GitData struct {
+	Token string `json:"token,omitempty"`
+	URL   string `json:"url,omitempty"`
+}
+
 // SetupSpec defines the desired state of Setup.
 type SetupSpec struct {
 	Name   string   `json:"name,omitempty"`
 	Report Reporter `json:"report,omitempty"`
+	Git    GitData  `json:"git,omitempty"`
 }
 
 // SetupStatus defines the observed state of Setup.

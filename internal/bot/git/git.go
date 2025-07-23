@@ -56,7 +56,9 @@ func (g *GitManager) Push() {
 		panic(err)
 	}
 
-	err = r.Push(&gogit.PushOptions{})
+	err = r.Push(&gogit.PushOptions{
+		Auth: g.Auth,
+	})
 	if err != nil {
 		panic(err)
 	}

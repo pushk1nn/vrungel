@@ -57,9 +57,10 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	token := setupList.Items[0].Spec.Report.Key
+	discordToken := setupList.Items[0].Spec.Report.Key
+	gitToken := setupList.Items[0].Spec.Git.Token
 
-	session, err := discordgo.New("Bot " + token)
+	session, err := discordgo.New("Bot " + discordToken)
 	if err != nil {
 		logger.Error(err, "unable to start discord session")
 	}
@@ -73,7 +74,7 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 	logger.Info("started discordgo session")
 
-	g := InitGitManager()
+	g := InitGitManager(gitToken)
 
 	session.AddHandler(
 		func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -101,10 +102,16 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	return ctrl.Result{}, nil
 }
 
-func InitGitManager() *git.GitManager {
+func InitGitManager(token string) *git.GitManager {
 	path := "/tmp/vrungel-automation"
 
+	auth := &http.BasicAuth{
+		Username: "vrungel",
+		Password: token,
+	}
+
 	r, err := gogit.PlainClone(path, &gogit.CloneOptions{
+		Auth:              auth,
 		URL:               "https://github.com/pushk1nn/argocd-test.git",
 		RecurseSubmodules: gogit.DefaultSubmoduleRecursionDepth,
 	})
@@ -115,10 +122,7 @@ func InitGitManager() *git.GitManager {
 	return &git.GitManager{
 		Path: path,
 		Repo: r,
-		Auth: &http.BasicAuth{
-			Username: "vrungel",
-			Password: "",
-		},
+		Auth: auth,
 	}
 }
 

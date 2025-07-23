@@ -96,7 +96,7 @@ func (d *DiscordBotManager) DiscordLog(ctx context.Context, obj client.Object) *
 
 func EncodeConstraint(obj client.Object) string {
 	raw := fmt.Sprintf("%s|%s|%s", obj.GetNamespace(), objType(obj), obj.GetName())
-	encoded := base64.URLEncoding.EncodeToString([]byte(raw))
+	encoded := base64.StdEncoding.EncodeToString([]byte(raw))
 
 	return encoded
 }

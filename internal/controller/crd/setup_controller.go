@@ -18,6 +18,7 @@ package crd
 
 import (
 	"context"
+	"strings"
 
 	"github.com/bwmarrin/discordgo"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -27,6 +28,7 @@ import (
 
 	crdv1 "vrungel.maxvk.com/controller/api/crd/v1"
 	"vrungel.maxvk.com/controller/internal/bot"
+	"vrungel.maxvk.com/controller/internal/bot/handlers"
 )
 
 // SetupReconciler reconciles a Setup object
@@ -71,9 +73,13 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	session.AddHandler(
 		func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			if i.Type == discordgo.InteractionMessageComponent {
-				switch i.MessageComponentData().CustomID {
-				case "create_constraint":
-					r.BotManager.HandleCreateConstraint(s, i)
+
+				// prefix will be the name of the handler without the base64 encoded info used for handling the request
+				prefix := strings.SplitN(i.MessageComponentData().CustomID, ":", 2)[0]
+
+				switch prefix {
+				case "role_constraint":
+					handlers.RoleConstraint(s, i)
 				}
 			}
 		},

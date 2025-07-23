@@ -2,6 +2,7 @@ package bot
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"sync"
 	"time"
@@ -78,7 +79,7 @@ func (d *DiscordBotManager) DiscordLog(ctx context.Context, obj client.Object) *
 						discordgo.Button{
 							Label:    "Block Role Binding",
 							Style:    discordgo.PrimaryButton,
-							CustomID: "create_constraint",
+							CustomID: fmt.Sprintf("role_constraint:%s", EncodeConstraint(obj)),
 						},
 					},
 				},
@@ -93,18 +94,11 @@ func (d *DiscordBotManager) DiscordLog(ctx context.Context, obj client.Object) *
 	return message
 }
 
-func (d *DiscordBotManager) HandleCreateConstraint(s *discordgo.Session, i *discordgo.InteractionCreate) {
+func EncodeConstraint(obj client.Object) string {
+	raw := fmt.Sprintf("%s|%s|%s", obj.GetNamespace(), objType(obj), obj.GetName())
+	encoded := base64.URLEncoding.EncodeToString([]byte(raw))
 
-	// Respond to the interaction
-	err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-		Type: discordgo.InteractionResponseChannelMessageWithSource,
-		Data: &discordgo.InteractionResponseData{
-			Content: "Button clicked! Action triggered.",
-		},
-	})
-	if err != nil {
-		panic(err)
-	}
+	return encoded
 }
 
 func objType(obj client.Object) string {

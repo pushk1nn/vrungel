@@ -36,10 +36,15 @@ func RoleConstraint(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		panic(err)
 	}
 
-	err = tmpl.Execute(os.Stdout, constraint)
+	output := "/tmp/generated/constraint.yaml"
+	os.MkdirAll("/tmp/generated", 0755)
+	f, err := os.Create(output)
 	if err != nil {
 		panic(err)
 	}
+
+	tmpl.Execute(f, constraint)
+	f.Close()
 
 	// Respond to the interaction
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{

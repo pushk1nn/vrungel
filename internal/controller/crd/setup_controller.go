@@ -110,9 +110,9 @@ func InitGitManager(cr crdv1.Setup) *git.GitManager {
 		Password: cr.Spec.Git.Token,
 	}
 
+	// First check if repo already exists
 	r, err := gogit.PlainOpen(path)
-
-	if err != nil {
+	if err != nil { // If it already exists
 		r, err = gogit.PlainClone(path, &gogit.CloneOptions{
 			Auth:              auth,
 			URL:               cr.Spec.Git.URL,
@@ -120,6 +120,28 @@ func InitGitManager(cr crdv1.Setup) *git.GitManager {
 		})
 		if err != nil {
 			panic(err)
+		}
+	} else {
+		remotes, err := r.Remotes()
+		if err != nil {
+			panic(err)
+		}
+
+		// Check to make sure this repo is equivalent to the one specified in CR
+		for _, remote := range remotes {
+			if remote.Config().Name == "origin" {
+				for _, url := range remote.Config().URLs {
+					if url == cr.Spec.Git.URL {
+						return &git.GitManager{
+							Path: path,
+							Repo: r,
+							Auth: auth,
+						}
+					}
+				}
+				// This is if the repo does not match the expected remote URL
+				return &git.GitManager{} // TODO: Add some kind of error message
+			}
 		}
 	}
 

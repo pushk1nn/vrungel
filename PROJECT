@@ -28,4 +28,13 @@ resources:
   kind: Setup
   path: vrungel.maxvk.com/controller/api/crd/v1
   version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: vrungel.maxvk.com
+  group: security
+  kind: Rule
+  path: vrungel.maxvk.com/controller/api/security/v1
+  version: v1
 version: "3"

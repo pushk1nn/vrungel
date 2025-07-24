@@ -231,6 +231,13 @@ func main() {
 		setupLog.Error(err, "unable to create controller", "controller", "RoleBindWatcher")
 		os.Exit(1)
 	}
+	if err := (&securitycontroller.RuleReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "Rule")
+		os.Exit(1)
+	}
 	// +kubebuilder:scaffold:builder
 
 	if metricsCertWatcher != nil {

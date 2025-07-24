@@ -20,13 +20,17 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// RoleBindWatcherSpec defines the desired state of RoleBindWatcher.
-type RoleBindWatcherSpec struct {
-	Name string `json:"name,omitempty"`
+type RoleBinding struct {
+	Risky     []string `json:"risky,omitempty"`
+	Blacklist []string `json:"blacklist,omitempty"`
 }
 
-// RoleBindWatcherStatus defines the observed state of RoleBindWatcher.
-type RoleBindWatcherStatus struct {
+type RuleSpec struct {
+	RoleBindingRules RoleBinding `json:"role_binding_rules,omitempty"`
+}
+
+// RuleStatus defines the observed state of Rule.
+type RuleStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 }
@@ -34,24 +38,24 @@ type RoleBindWatcherStatus struct {
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
 
-// RoleBindWatcher is the Schema for the rolebindwatchers API.
-type RoleBindWatcher struct {
+// Rule is the Schema for the rules API.
+type Rule struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   RoleBindWatcherSpec   `json:"spec,omitempty"`
-	Status RoleBindWatcherStatus `json:"status,omitempty"`
+	Spec   RuleSpec   `json:"spec,omitempty"`
+	Status RuleStatus `json:"status,omitempty"`
 }
 
 // +kubebuilder:object:root=true
 
-// RoleBindWatcherList contains a list of RoleBindWatcher.
-type RoleBindWatcherList struct {
+// RuleList contains a list of Rule.
+type RuleList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []RoleBindWatcher `json:"items"`
+	Items           []Rule `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&RoleBindWatcher{}, &RoleBindWatcherList{})
+	SchemeBuilder.Register(&Rule{}, &RuleList{})
 }

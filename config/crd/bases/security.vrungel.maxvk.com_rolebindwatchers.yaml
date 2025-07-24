@@ -39,17 +39,10 @@ spec:
           spec:
             description: RoleBindWatcherSpec defines the desired state of RoleBindWatcher.
             properties:
-              name:
-                type: string
-              report:
-                properties:
-                  channel:
-                    type: string
-                  key:
-                    type: string
-                  kind:
-                    type: string
-                type: object
+              risky:
+                items:
+                  type: string
+                type: array
             type: object
           status:
             description: RoleBindWatcherStatus defines the observed state of RoleBindWatcher.

@@ -39,6 +39,13 @@ spec:
           spec:
             description: SetupSpec defines the desired state of Setup.
             properties:
+              git:
+                properties:
+                  token:
+                    type: string
+                  url:
+                    type: string
+                type: object
               name:
                 type: string
               report:

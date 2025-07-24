@@ -18,6 +18,7 @@ package security
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -34,6 +35,7 @@ import (
 
 	// securityv1 "vrungel.maxvk.com/controller/api/security/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	secv1 "vrungel.maxvk.com/controller/api/security/v1"
 )
 
 // RoleBindWatcherReconciler reconciles a RoleBindWatcher object
@@ -41,7 +43,12 @@ type RoleBindWatcherReconciler struct {
 	client.Client
 	Scheme     *runtime.Scheme
 	BotManager *bot.DiscordBotManager
+	RoleSet    map[string]struct{}
 }
+
+var (
+	RoleBindWatcherList secv1.RoleBindWatcherList
+)
 
 // +kubebuilder:rbac:groups=security.vrungel.maxvk.com,resources=rolebindwatchers,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=security.vrungel.maxvk.com,resources=rolebindwatchers/status,verbs=get;update;patch
@@ -49,6 +56,10 @@ type RoleBindWatcherReconciler struct {
 
 func (r *RoleBindWatcherReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
+
+	r.generateLists(ctx)
+
+	fmt.Printf("%#v\n", r.RoleSet)
 
 	if r.BotManager.GetSession() == nil {
 		logger.Info("discordgo session not ready, requeuing reconcile request for: ")
@@ -92,4 +103,20 @@ func (r *RoleBindWatcherReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		).
 		Named("security-rolebindwatcher").
 		Complete(r)
+}
+
+func (r *RoleBindWatcherReconciler) generateLists(ctx context.Context) {
+	if err := r.List(ctx, &RoleBindWatcherList); err != nil {
+		panic(err)
+	}
+
+	roleSet := make(map[string]struct{})
+
+	for _, instance := range RoleBindWatcherList.Items {
+		for i := range instance.Spec.Risky {
+			roleSet[instance.Spec.Risky[i]] = struct{}{}
+		}
+	}
+
+	r.RoleSet = roleSet
 }

@@ -18,7 +18,6 @@ package security
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -57,10 +56,6 @@ var (
 func (r *RoleBindWatcherReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
-	r.generateLists(ctx)
-
-	fmt.Printf("%#v\n", r.RoleSet)
-
 	if r.BotManager.GetSession() == nil {
 		logger.Info("discordgo session not ready, requeuing reconcile request for: ")
 		return ctrl.Result{RequeueAfter: time.Second * 3}, nil
@@ -81,8 +76,15 @@ func (r *RoleBindWatcherReconciler) HandleRBACEvents(ctx context.Context, rb cli
 
 	logger := log.FromContext(ctx)
 
-	if rb.GetNamespace() == "default" {
-		logger.Info("Role binding found: " + rb.GetName())
+	r.generateLists(ctx)
+
+	role, ok := rb.(*rbacv1.RoleBinding)
+	if !ok {
+		panic(ok)
+	}
+
+	if _, risky := r.RoleSet[role.RoleRef.Name]; risky {
+		logger.Info("Risky RoleBinding found: " + role.GetName())
 		return []reconcile.Request{{
 			NamespacedName: types.NamespacedName{
 				Name:      rb.GetName(),
@@ -90,6 +92,7 @@ func (r *RoleBindWatcherReconciler) HandleRBACEvents(ctx context.Context, rb cli
 			},
 		}}
 	}
+
 	return []reconcile.Request{}
 }
 
@@ -105,6 +108,8 @@ func (r *RoleBindWatcherReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
+// This is a very inefficient way to find which pods are risky, but it is being implemented this way for the sake of a PoC
+// TODO: Move list generation to another controller to only require this controller to read the list
 func (r *RoleBindWatcherReconciler) generateLists(ctx context.Context) {
 	if err := r.List(ctx, &RoleBindWatcherList); err != nil {
 		panic(err)

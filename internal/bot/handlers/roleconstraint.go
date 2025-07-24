@@ -58,7 +58,7 @@ func (h *HandlerManager) RoleConstraint(s *discordgo.Session, i *discordgo.Inter
 	err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 		Type: discordgo.InteractionResponseChannelMessageWithSource,
 		Data: &discordgo.InteractionResponseData{
-			Content: fmt.Sprintf("Button clicked! base64 encoded request: %s", decoded),
+			Content: "Processing constraint creation...",
 		},
 	})
 	if err != nil {

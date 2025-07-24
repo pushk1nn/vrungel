@@ -41,7 +41,7 @@ func (h *HandlerManager) RoleConstraint(s *discordgo.Session, i *discordgo.Inter
 		panic(err)
 	}
 
-	output := "/tmp/vrungel-automation/constraint.yaml"
+	output := "/tmp/vrungel-automation/rolebinding-constraints/constraint.yaml"
 	// os.MkdirAll("/tmp/generated", 0755)
 	f, err := os.Create(output)
 	if err != nil {

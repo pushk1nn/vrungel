@@ -26,7 +26,7 @@ func (g *GitManager) Commit(filename string) {
 		panic(err)
 	}
 
-	_, err = w.Add(filename)
+	_, err = w.Add("rolebinding-constraints/" + filename)
 	if err != nil {
 		panic(err)
 	}

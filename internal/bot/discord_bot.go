@@ -48,6 +48,11 @@ func (d *DiscordBotManager) GetSession() *discordgo.Session {
 
 func (d *DiscordBotManager) DiscordLog(ctx context.Context, obj client.Object) *discordgo.Message {
 
+	role, ok := obj.(*rbacv1.RoleBinding)
+	if !ok {
+		panic(ok)
+	}
+
 	message, err := d.GetSession().ChannelMessageSendComplex(
 		"1393623353830412358",
 		&discordgo.MessageSend{
@@ -58,8 +63,8 @@ func (d *DiscordBotManager) DiscordLog(ctx context.Context, obj client.Object) *
 					Description: fmt.Sprintf("A %s has been created in namespace %s", objType(obj), obj.GetNamespace()),
 					Fields: []*discordgo.MessageEmbedField{
 						{
-							Name:   "Kind",
-							Value:  obj.GetName(),
+							Name:   "Role",
+							Value:  role.RoleRef.Name,
 							Inline: true,
 						},
 					},
@@ -79,7 +84,7 @@ func (d *DiscordBotManager) DiscordLog(ctx context.Context, obj client.Object) *
 						discordgo.Button{
 							Label:    "Block Role Binding",
 							Style:    discordgo.PrimaryButton,
-							CustomID: fmt.Sprintf("role_constraint:%s", EncodeConstraint(obj)),
+							CustomID: fmt.Sprintf("role_constraint:%s", EncodeConstraint(role)),
 						},
 					},
 				},
@@ -95,7 +100,12 @@ func (d *DiscordBotManager) DiscordLog(ctx context.Context, obj client.Object) *
 }
 
 func EncodeConstraint(obj client.Object) string {
-	raw := fmt.Sprintf("%s|%s|%s", obj.GetNamespace(), objType(obj), obj.GetName())
+	role, ok := obj.(*rbacv1.RoleBinding)
+	if !ok {
+		panic(ok)
+	}
+
+	raw := fmt.Sprintf("%s|%s|%s", obj.GetNamespace(), objType(obj), role.RoleRef.Name)
 	encoded := base64.StdEncoding.EncodeToString([]byte(raw))
 
 	return encoded

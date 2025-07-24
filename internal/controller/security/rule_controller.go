@@ -33,22 +33,13 @@ type RuleReconciler struct {
 	client.Client
 	Scheme      *runtime.Scheme
 	Initialized bool
-	RoleSet     map[string]struct{}
+	RiskyRoles  map[string]struct{}
 }
 
 // +kubebuilder:rbac:groups=security.vrungel.maxvk.com,resources=rules,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=security.vrungel.maxvk.com,resources=rules/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=security.vrungel.maxvk.com,resources=rules/finalizers,verbs=update
 
-// Reconcile is part of the main kubernetes reconciliation loop which aims to
-// move the current state of the cluster closer to the desired state.
-// TODO(user): Modify the Reconcile function to compare the state specified by
-// the Rule object against the actual cluster state, and then
-// perform operations to make the cluster state reflect the state specified by
-// the user.
-//
-// For more details, check Reconcile and its Result here:
-// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.21.0/pkg/reconcile
 func (r *RuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := log.FromContext(ctx)
 
@@ -66,9 +57,9 @@ func (r *RuleReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.
 		}
 	}
 
-	r.RoleSet = roleSet
+	r.RiskyRoles = roleSet
 	logger.Info("Ruleset initialized!")
-	fmt.Println(r.RoleSet)
+	fmt.Println(r.RiskyRoles)
 
 	r.Initialized = true
 

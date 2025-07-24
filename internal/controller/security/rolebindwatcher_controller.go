@@ -75,7 +75,7 @@ func (r *RoleBindWatcherReconciler) Reconcile(ctx context.Context, req ctrl.Requ
 	}
 
 	// Check if role is in risky role set
-	if _, risky := r.RuleManager.RoleSet[rb.RoleRef.Name]; risky {
+	if _, risky := r.RuleManager.RiskyRoles[rb.RoleRef.Name]; risky {
 		r.BotManager.DiscordLog(ctx, &rb)
 	}
 

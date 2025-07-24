@@ -208,7 +208,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	discordBotManager := bot.NewDiscordBotManager()
+	discordBotManager := &bot.DiscordBotManager{}
 
 	if err := mgr.Add(discordBotManager); err != nil {
 		setupLog.Error(err, "unable to add bot manager as runnable")
@@ -228,7 +228,7 @@ func main() {
 		Client:      mgr.GetClient(),
 		Scheme:      mgr.GetScheme(),
 		Initialized: false,
-		RoleSet:     make(map[string]struct{}),
+		RiskyRoles:  make(map[string]struct{}),
 	}
 	if err := ruleReconciler.SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Rule")

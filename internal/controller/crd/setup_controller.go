@@ -57,8 +57,9 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
-	discordToken := setupList.Items[0].Spec.Report.Key
-	gitToken := setupList.Items[0].Spec.Git.Token
+	cr := setupList.Items[0]
+
+	discordToken := cr.Spec.Report.Key
 
 	session, err := discordgo.New("Bot " + discordToken)
 	if err != nil {
@@ -74,7 +75,7 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 	logger.Info("started discordgo session")
 
-	g := InitGitManager(gitToken)
+	g := InitGitManager(cr)
 
 	session.AddHandler(
 		func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -102,21 +103,46 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	return ctrl.Result{}, nil
 }
 
-func InitGitManager(token string) *git.GitManager {
+func InitGitManager(cr crdv1.Setup) *git.GitManager {
 	path := "/tmp/vrungel-automation"
-
 	auth := &http.BasicAuth{
 		Username: "vrungel",
-		Password: token,
+		Password: cr.Spec.Git.Token,
 	}
 
-	r, err := gogit.PlainClone(path, &gogit.CloneOptions{
-		Auth:              auth,
-		URL:               "https://github.com/pushk1nn/argocd-test.git",
-		RecurseSubmodules: gogit.DefaultSubmoduleRecursionDepth,
-	})
-	if err != nil {
-		panic(err)
+	// First check if repo already exists
+	r, err := gogit.PlainOpen(path)
+	if err != nil { // If it already exists
+		r, err = gogit.PlainClone(path, &gogit.CloneOptions{
+			Auth:              auth,
+			URL:               cr.Spec.Git.URL,
+			RecurseSubmodules: gogit.DefaultSubmoduleRecursionDepth,
+		})
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		remotes, err := r.Remotes()
+		if err != nil {
+			panic(err)
+		}
+
+		// Check to make sure this repo is equivalent to the one specified in CR
+		for _, remote := range remotes {
+			if remote.Config().Name == "origin" {
+				for _, url := range remote.Config().URLs {
+					if url == cr.Spec.Git.URL {
+						return &git.GitManager{
+							Path: path,
+							Repo: r,
+							Auth: auth,
+						}
+					}
+				}
+				// This is if the repo does not match the expected remote URL
+				return &git.GitManager{} // TODO: Add some kind of error message
+			}
+		}
 	}
 
 	return &git.GitManager{

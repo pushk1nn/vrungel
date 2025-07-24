@@ -34,7 +34,6 @@ rules:
   - security.vrungel.maxvk.com
   resources:
   - rolebindwatchers
-  - rules
   verbs:
   - create
   - delete
@@ -47,14 +46,12 @@ rules:
   - security.vrungel.maxvk.com
   resources:
   - rolebindwatchers/finalizers
-  - rules/finalizers
   verbs:
   - update
 - apiGroups:
   - security.vrungel.maxvk.com
   resources:
   - rolebindwatchers/status
-  - rules/status
   verbs:
   - get
   - patch

@@ -4,7 +4,6 @@
 resources:
 - bases/security.vrungel.maxvk.com_rolebindwatchers.yaml
 - bases/crd.vrungel.maxvk.com_setups.yaml
-- bases/security.vrungel.maxvk.com_rules.yaml
 # +kubebuilder:scaffold:crdkustomizeresource
 
 patches:

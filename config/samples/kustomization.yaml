@@ -2,5 +2,4 @@
 resources:
 - security_v1_rolebindwatcher.yaml
 - crd_v1_setup.yaml
-- security_v1_rule.yaml
 # +kubebuilder:scaffold:manifestskustomizesamples

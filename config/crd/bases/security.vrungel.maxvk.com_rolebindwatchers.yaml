@@ -41,6 +41,15 @@ spec:
             properties:
               name:
                 type: string
+              report:
+                properties:
+                  channel:
+                    type: string
+                  key:
+                    type: string
+                  kind:
+                    type: string
+                type: object
             type: object
           status:
             description: RoleBindWatcherStatus defines the observed state of RoleBindWatcher.

@@ -24,9 +24,6 @@ resources:
 # default, aiding admins in cluster management. Those roles are
 # not used by the vrungel itself. You can comment the following lines
 # if you do not want those helpers be installed with your Project.
-- security_rule_admin_role.yaml
-- security_rule_editor_role.yaml
-- security_rule_viewer_role.yaml
 - crd_setup_admin_role.yaml
 - crd_setup_editor_role.yaml
 - crd_setup_viewer_role.yaml

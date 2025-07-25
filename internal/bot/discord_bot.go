@@ -20,10 +20,6 @@ type DiscordBotManager struct {
 	Cache   *cache.Cache
 }
 
-// type RoleBindingConstraint struct {
-// 	role string
-// }
-
 func NewDiscordBotManager() *DiscordBotManager {
 	return &DiscordBotManager{}
 }
@@ -65,8 +61,8 @@ func (d *DiscordBotManager) DiscordLog(ctx context.Context, obj client.Object) *
 			Embeds: []*discordgo.MessageEmbed{
 				{
 					Author:      &discordgo.MessageEmbedAuthor{},
-					Color:       0x00ff00, // Green
-					Description: fmt.Sprintf("A %s has been created in namespace %s", objType(obj), obj.GetNamespace()),
+					Color:       0xebad50, // Yellow
+					Description: fmt.Sprintf("A %s has been detected in namespace %s", objType(obj), obj.GetNamespace()),
 					Fields: []*discordgo.MessageEmbedField{
 						{
 							Name:   "Role",
@@ -81,7 +77,7 @@ func (d *DiscordBotManager) DiscordLog(ctx context.Context, obj client.Object) *
 						URL: "https://cdn.discordapp.com/avatars/119249192806776836/cc32c5c3ee602e1fe252f9f595f9010e.jpg?size=2048",
 					},
 					Timestamp: time.Now().Format(time.RFC3339), // Discord wants ISO8601; RFC3339 is an extension of ISO8601 and should be completely compatible.
-					Title:     "Resource Creation",
+					Title:     "Risky Role Detected",
 				},
 			},
 			Components: []discordgo.MessageComponent{

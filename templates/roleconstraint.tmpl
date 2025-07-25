@@ -8,4 +8,4 @@ spec:
       - apiGroups: ["rbac.authorization.k8s.io"]
         kinds: ["RoleBinding"]
   parameters:
-    blacklist: ["{{ .Role }}"]
+    blacklist: ["{{ .Target }}"]

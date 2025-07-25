@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dangerous-rb-blocked
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: test-sa
+roleRef:
+  kind: Role 
+  name: dangerous-role 
+  apiGroup: rbac.authorization.k8s.io

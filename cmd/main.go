@@ -21,9 +21,11 @@ import (
 	"flag"
 	"os"
 	"path/filepath"
+	"time"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
+	"github.com/patrickmn/go-cache"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -208,7 +210,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	discordBotManager := &bot.DiscordBotManager{}
+	discordBotManager := &bot.DiscordBotManager{
+		Cache: cache.New(5*time.Minute, 10*time.Minute),
+	}
 
 	if err := mgr.Add(discordBotManager); err != nil {
 		setupLog.Error(err, "unable to add bot manager as runnable")

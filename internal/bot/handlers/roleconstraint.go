@@ -1,36 +1,26 @@
 package handlers
 
 import (
-	"encoding/base64"
 	"fmt"
 	"os"
-	"strings"
 	"text/template"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/patrickmn/go-cache"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"vrungel.maxvk.com/controller/internal/bot/git"
+	"vrungel.maxvk.com/controller/structs"
 )
 
 type HandlerManager struct {
 	GitManager *git.GitManager
-}
-
-type Constraint struct {
-	Role string
+	Cache      *cache.Cache
 }
 
 func (h *HandlerManager) RoleConstraint(s *discordgo.Session, i *discordgo.InteractionCreate) {
 
-	// Decode interaction data
-	req := strings.SplitN(i.MessageComponentData().CustomID, ":", 2)[1]
-	decoded, err := base64.StdEncoding.DecodeString(req)
-	if err != nil {
-		fmt.Println("Error decoding Base64:", err)
-		return
-	}
-
 	// Call helper function to fill constraint struct with data
-	constraint := populateConstraint(string(decoded))
+	constraint := h.populateConstraint(i.MessageComponentData().CustomID)
 
 	// Fill template
 	var tmplFile = "roleconstraint.tmpl"
@@ -42,7 +32,6 @@ func (h *HandlerManager) RoleConstraint(s *discordgo.Session, i *discordgo.Inter
 	}
 
 	output := "/tmp/vrungel-automation/rolebinding-constraints/constraint.yaml"
-	// os.MkdirAll("/tmp/generated", 0755)
 	f, err := os.Create(output)
 	if err != nil {
 		panic(err)
@@ -66,10 +55,18 @@ func (h *HandlerManager) RoleConstraint(s *discordgo.Session, i *discordgo.Inter
 	}
 }
 
-func populateConstraint(req string) Constraint {
-	body := strings.SplitN(req, "|", 3)
+func (h *HandlerManager) populateConstraint(id string) structs.Constraint {
+	// Retrieve entry from request cache
+	query, found := h.Cache.Get(id)
+	if found {
+		// Assert that type is role binding
+		role := query.(*rbacv1.RoleBinding) // TODO: Generalize for different types
 
-	return Constraint{
-		Role: body[2],
+		return structs.Constraint{
+			Target: role.RoleRef.Name,
+		}
 	}
+
+	fmt.Println("Could not find CustomID in cache")
+	return structs.Constraint{}
 }

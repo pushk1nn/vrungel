@@ -2,12 +2,13 @@ package bot
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"sync"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/google/uuid"
+	"github.com/patrickmn/go-cache"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -16,7 +17,12 @@ import (
 type DiscordBotManager struct {
 	mu      sync.RWMutex
 	session *discordgo.Session
+	Cache   *cache.Cache
 }
+
+// type RoleBindingConstraint struct {
+// 	role string
+// }
 
 func NewDiscordBotManager() *DiscordBotManager {
 	return &DiscordBotManager{}
@@ -84,7 +90,7 @@ func (d *DiscordBotManager) DiscordLog(ctx context.Context, obj client.Object) *
 						discordgo.Button{
 							Label:    "Block Role Binding",
 							Style:    discordgo.PrimaryButton,
-							CustomID: fmt.Sprintf("role_constraint:%s", EncodeConstraint(role)),
+							CustomID: d.cacheEntry(obj),
 						},
 					},
 				},
@@ -99,16 +105,24 @@ func (d *DiscordBotManager) DiscordLog(ctx context.Context, obj client.Object) *
 	return message
 }
 
-func EncodeConstraint(obj client.Object) string {
-	role, ok := obj.(*rbacv1.RoleBinding)
-	if !ok {
-		panic(ok)
-	}
+// Set k:v pair in cache and return the UUID to be used as the discord interaction CustomID
+func (d *DiscordBotManager) cacheEntry(obj client.Object) string {
+	id := fmt.Sprintf("role_constraint:%s", uuid.NewString()) // TODO: change this to be generalized
 
-	raw := fmt.Sprintf("%s|%s|%s", obj.GetNamespace(), objType(obj), role.RoleRef.Name)
-	encoded := base64.StdEncoding.EncodeToString([]byte(raw))
+	// rb, ok := obj.(*rbacv1.RoleBinding) // TODO: Maybe this doesn't need to be asserted twice?
+	// if !ok {
+	// 	panic(ok)
+	// }
 
-	return encoded
+	// // Data that will be logged to the cache
+	// data := RoleBindingConstraint{
+	// 	role: rb.RoleRef.Name,
+	// }
+
+	// Set cache entry
+	d.Cache.Set(id, obj, cache.DefaultExpiration)
+
+	return id
 }
 
 func objType(obj client.Object) string {

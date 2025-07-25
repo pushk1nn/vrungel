@@ -86,6 +86,7 @@ func (r *SetupReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 
 				h := &handlers.HandlerManager{
 					GitManager: g,
+					Cache:      r.BotManager.Cache,
 				}
 
 				switch prefix {

@@ -24,6 +24,10 @@ func NewDiscordBotManager() *DiscordBotManager {
 	return &DiscordBotManager{}
 }
 
+// Start is required for a "Runnable" to be registered with the controller-manager.
+// Ironically, it is just setting up the bot to Stop with the rest of the program
+// by waiting for the context to finish (program stopped). This way, it won't hang
+// open after the program stops.
 func (d *DiscordBotManager) Start(ctx context.Context) error {
 	logger := log.FromContext(ctx)
 

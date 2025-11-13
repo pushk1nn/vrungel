@@ -210,10 +210,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	// discordBotManager is the class that is passed into the controllers. If a controller like
+	// RoleBindWatcher needs to log something to Discord, it will populate data in the cache
+	// prior to activating the handler functions. This is done to get around the limit on the size
+	// of requests that can be passed with DiscordGo.
 	discordBotManager := &bot.DiscordBotManager{
 		Cache: cache.New(5*time.Minute, 10*time.Minute),
 	}
-
 	if err := mgr.Add(discordBotManager); err != nil {
 		setupLog.Error(err, "unable to add bot manager as runnable")
 		os.Exit(1)
